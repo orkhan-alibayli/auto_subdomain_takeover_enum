@@ -2,6 +2,7 @@ import time
 import os
 import threading
 import requests
+from subprocess import check_output
 
 #this command should rune in another thread
 #os.system('amass enum -d orkhan-alibayli.com > /home/orkhan/python_amass.txt')
@@ -9,7 +10,7 @@ import requests
 #this function will execute given system commands in another thred
 def execute_amass():
 	print("-- T1: this print function was called by another thread")
-	os.system('amass enum -d orkhan-alibayli.com >> /home/orkhan/automation/outputs/python_amass.txt')
+	os.system('amass enum -df /home/orkhan/automation/subdomains.txt >> /home/orkhan/automation/outputs/python_amass.txt')
 	print('-- T1: execution of given command ended')
 
 
@@ -28,11 +29,15 @@ def execute_subjack():
 
 
 def sent_alert(line):
+	sended_lines = []
 	headers = {'Content-type: application/json'}
 	url = 'https://hooks.slack.com/services/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'
 	data = {"text":line}
-
-	response = requests.post(url, json = data)
+	if(line not in sended_lines):
+		response = requests.post(url, json = data)
+		sended_lines.append(line)
+	else:
+		print('-- sent_alert: this line is already sent')
 
 
 def normalize_line(line):
