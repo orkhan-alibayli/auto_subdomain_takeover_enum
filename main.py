@@ -1,7 +1,7 @@
 import time
 import os
 import threading
-from subprocess import check_output
+import requests
 
 #this command should rune in another thread
 #os.system('amass enum -d orkhan-alibayli.com > /home/orkhan/python_amass.txt')
@@ -16,17 +16,39 @@ def execute_amass():
 def execute_subjack():
 
 	while(True):
-		if(os.path.exists('/home/orkhan/python_amass.txt')):
+		if(os.path.exists('/home/orkhan/automation/outputs/python_amass.txt')):
 			print('-- T2: subjack is starting')
 			os.system('subjack -w /home/orkhan/automation/outputs/python_amass.txt >> /home/orkhan/automation/outputs/python_subjack.txt')
 			print('-- T2: subjack stopped')
 			print('-- T2: subjack going to sleep for 10 seconds')
 			time.sleep(10)
 		else:
-			print('file does not exists yet')
+			print('-- T2: file does not exists yet. going to sleep for 10 seconds')
+			time.sleep(10)
 
-	
+
+def sent_alert(line):
+	headers = {'Content-type: application/json'}
+	url = 'https://hooks.slack.com/services/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'
+	data = {"text":line}
+
+	response = requests.post(url, json = data)
+
+
+def normalize_line(line):
+	chars = '[]'
+	print(line)
+	for char in chars:
+		line = line.replace(char, '')
+	line = 'This service is vulnerable to subdomain takeover: ' + line + ''
+	#print(f'|{line}|')
+	return line
+
+
 def read_subjack_file():
+
+	vulnerable_services = ['HEROKU','INTERCOM','JETBRAINS','PANTHEON','README','S3 BUCKET','SHOPIFY','SIMPLEBOOKLET','SMUGMUG','SURGE','TEAMWORK','TICTAIL','TUMBLR','USERVOICE','VEND','WEBFLOW','WISHPOND','WORDPRESS','WORKSITES.NET','ZENDESK']
+
 	while(True):
 		if(os.path.exists('/home/orkhan/automation/outputs/python_subjack.txt')):
 			with open('/home/orkhan/automation/outputs/python_subjack.txt', 'r') as f:
@@ -38,8 +60,12 @@ def read_subjack_file():
 						print('-- T3: new line not found. Going to sleep for 10 seconds')
 						time.sleep(10)
 					else:
-						if 'GITHUB' in line:
-							print('-- T3: vulnarable subdomain found')
+						for service in vulnerable_services:
+							if service in line:
+								print('-- T3: VULNERABLE SUBDOMAIN FOUND')
+								#os.system('whoami')
+								line = normalize_line(line)
+								sent_alert(line)
 		else:
 			print('-- T3: python_subjack file does not exists yet')
 			print('-- T3: going to sleep for 10 seconds')
