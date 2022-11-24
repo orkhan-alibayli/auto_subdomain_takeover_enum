@@ -1,8 +1,10 @@
 import time
 import os
 import threading
-import requests
 from subprocess import check_output
+import requests
+
+sended_urls = []
 
 #this command should rune in another thread
 #os.system('amass enum -d orkhan-alibayli.com > /home/orkhan/python_amass.txt')
@@ -10,7 +12,7 @@ from subprocess import check_output
 #this function will execute given system commands in another thred
 def execute_amass():
 	print("-- T1: this print function was called by another thread")
-	os.system('amass enum -df /home/orkhan/automation/subdomains.txt >> /home/orkhan/automation/outputs/python_amass.txt')
+	os.system('amass enum -d orkhan-alibayli.com >> /home/orkhan/automation/outputs/python_amass.txt')
 	print('-- T1: execution of given command ended')
 
 
@@ -28,31 +30,46 @@ def execute_subjack():
 			time.sleep(10)
 
 
-def sent_alert(line):
-	sended_lines = []
-	headers = {'Content-type: application/json'}
-	url = 'https://hooks.slack.com/services/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'
-	data = {"text":line}
-	if(line not in sended_lines):
-		response = requests.post(url, json = data)
-		sended_lines.append(line)
-	else:
-		print('-- sent_alert: this line is already sent')
+def sent_heart_beat():
+    pass
 
+def sent_alert(line_as_list):
+	# sended_lines = []
+	# headers = {'Content-type: application/json'}
+	# url = 'https://hooks.slack.com/services/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'
+	# data = {"text":line}
+	# if(line not in sended_lines):
+	# 	response = requests.post(url, json = data)
+	# 	sended_lines.append(line)
+	# else:
+	# 	print('-- sent_alert: this line is already sent')
+    headers = {'Content-type: application/json'}
+    url = 'https://hooks.slack.com/services/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'
+    print('!!!! Sended urls', sended_urls)
+    print('!!!! lise as list[1]', line_as_list)
+    if(line_as_list[1] not in sended_urls):
+        data = {"text":str(line_as_list)}
+        response = requests.post(url, json = data)
+        sended_urls.append(line_as_list[1])
+    else:
+        print('-- sent_alert: this line is already sent')
 
 def normalize_line(line):
-	chars = '[]'
-	print(line)
-	for char in chars:
-		line = line.replace(char, '')
-	line = 'This service is vulnerable to subdomain takeover: ' + line + ''
-	#print(f'|{line}|')
-	return line
+	# chars = '[]'
+	# print(line)
+	# for char in chars:
+	# 	line = line.replace(char, '')
+	# line = 'This service is vulnerable to subdomain takeover: ' + line + ''
+	# #print(f'|{line}|')
+	# return line
+    line_as_list = line.split()
+    print('line as list: ', line_as_list)
+    return line_as_list
 
 
 def read_subjack_file():
 
-	vulnerable_services = ['HEROKU','INTERCOM','JETBRAINS','PANTHEON','README','S3 BUCKET','SHOPIFY','SIMPLEBOOKLET','SMUGMUG','SURGE','TEAMWORK','TICTAIL','TUMBLR','USERVOICE','VEND','WEBFLOW','WISHPOND','WORDPRESS','WORKSITES.NET','ZENDESK']
+	vulnerable_services = ['AFTERSHIP','AHA','APIGEE','AZURE','BIGCARTEL','BITBUCKET','BRIGHTCOVE','CAMPAIGNMONITOR','GETRESPONSE','GITHUB','GHOST','HELPJUICE','HELPSCOUT','HEROKU','INTERCOM','JETBRAINS','PANTHEON','README','S3 BUCKET','SHOPIFY','SIMPLEBOOKLET','SMUGMUG','SURGE','TEAMWORK','TICTAIL','TUMBLR','USERVOICE','VEND','WEBFLOW','WISHPOND','WORDPRESS','WORKSITES.NET','ZENDESK']
 
 	while(True):
 		if(os.path.exists('/home/orkhan/automation/outputs/python_subjack.txt')):
@@ -69,8 +86,8 @@ def read_subjack_file():
 							if service in line:
 								print('-- T3: VULNERABLE SUBDOMAIN FOUND')
 								#os.system('whoami')
-								line = normalize_line(line)
-								sent_alert(line)
+								line_as_list = normalize_line(line)
+								sent_alert(line_as_list)
 		else:
 			print('-- T3: python_subjack file does not exists yet')
 			print('-- T3: going to sleep for 10 seconds')
@@ -117,5 +134,4 @@ if __name__ == '__main__':
 	t_read.start()
 
 	main()
-
 
