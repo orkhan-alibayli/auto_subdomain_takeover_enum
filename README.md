@@ -9,7 +9,7 @@ The first task is accomplished by using OWASP Amass ( https://github.com/OWASP/A
 
 In the second task subjack tool ( https://github.com/haccer/subjack ) helps to solve the problem of verifying vulnerabilities.
 
-I used the requests module for solving this problem. There is one thread in the program which continues reading the output of subjack and if there is a new line in the file program will send me a slack notification.
+I used the requests module for solving third problem. There is one thread in the program which continues reading the output of subjack and if there is a new line in the file program will send me a slack notification.
 
 
 For more information about subdomain takeover vulnerabilities refer to my blog post in medium: https://medium.com/@orkhan_alibayli/subdomain-takeover-95646de1f436
