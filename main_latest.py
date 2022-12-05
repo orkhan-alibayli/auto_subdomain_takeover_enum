@@ -43,7 +43,7 @@ def sent_alert(line_as_list):
     '''
 
     headers = {'Content-type: application/json'}
-    url = 'https://hooks.slack.com/services/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'
+    url = '*****************************************************************'
 
     if(line_as_list[1] not in sended_urls):
         data = {"text":str(line_as_list)}
